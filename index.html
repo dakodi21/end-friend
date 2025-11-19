@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0d6efd">
+    <title>Voting Sederhana - PWA</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="manifest" href="#" id="manifest-placeholder">
+    <style>
+        :root {
+            --primary-blue: #0d6efd;
+            --secondary-red: #dc3545;
+            --light-bg: #f8f9fa;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--light-bg) 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .login-container {
+            max-width: 400px;
+            margin: 100px auto;
+        }
+
+        .login-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            padding: 40px;
+        }
+
+        .app-container {
+            max-width: 800px;
+            margin: 50px auto;
+            display: none;
+        }
+
+        .app-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            padding: 30px;
+        }
+
+        .vote-option {
+            background: linear-gradient(135deg, var(--primary-blue) 0%, #0a58ca 100%);
+            color: white;
+            border-radius: 10px;
+            padding: 30px;
+            margin: 15px 0;
+            text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .vote-option:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(13,110,253,0.3);
+        }
+
+        .vote-option.option-b {
+            background: linear-gradient(135deg, var(--secondary-red) 0%, #b02a37 100%);
+        }
+
+        .vote-option.option-b:hover {
+            box-shadow: 0 15px 35px rgba(220,53,69,0.3);
+        }
+
+        .vote-count {
+            font-size: 3rem;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+
+        .vote-percentage {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .progress-bar-custom {
+            height: 30px;
+            border-radius: 15px;
+            background: #e9ecef;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+
+        .progress-fill-a {
+            background: var(--primary-blue);
+            height: 100%;
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .progress-fill-b {
+            background: var(--secondary-red);
+            height: 100%;
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .btn-vote {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 10px;
+            transition: all 0.3s;
+        }
+
+        .btn-vote:active {
+            transform: scale(0.95);
+        }
+
+        .header-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            width: 120px;
+            height: 120px;
+            background: var(--primary-blue);
+            border-radius: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            color: white;
+            font-size: 2rem;
+            font-weight: bold;
+            position: relative;
+            box-shadow: 0 5px 20px rgba(13,110,253,0.3);
+        }
+
+        .logo-circle {
+            width: 70px;
+            height: 70px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .checkmark {
+            width: 40px;
+            height: 40px;
+            border: 5px solid #003d82;
+            border-top: none;
+            border-right: none;
+            transform: rotate(-45deg);
+            margin-top: -8px;
+            margin-left: -3px;
+        }
+
+        .install-prompt {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Install Prompt -->
+    <div class="container">
+        <div class="install-prompt" id="installPrompt">
+            <div class="d-flex justify-content-between align-items-center">
+                <span>📱 Install aplikasi ini untuk akses lebih cepat!</span>
+                <button class="btn btn-warning btn-sm" id="installBtn">Install</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Section -->
+    <div class="login-container" id="loginSection">
+        <div class="login-card">
+            <div class="logo">
+                <div class="logo-circle">
+                    <div class="checkmark"></div>
+                </div>
+            </div>
+            <h2 class="text-center mb-2" style="color: #003d82; font-weight: bold;">VOTING APP</h2>
+            <p class="text-center text-muted mb-4" style="font-size: 1.1rem;">Voting Sederhana</p>
+            <p class="text-center text-muted mb-4">Masuk untuk memulai voting</p>
+            <form id="loginForm">
+                <div class="mb-3">
+                    <label class="form-label">Username</label>
+                    <input type="text" class="form-control" id="username" placeholder="Masukkan username" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Password</label>
+                    <input type="password" class="form-control" id="password" placeholder="Masukkan password" required>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Masuk</button>
+                <p class="text-center text-muted mt-3 small">Demo: username/password bebas</p>
+            </form>
+        </div>
+    </div>
+
+    <!-- App Section -->
+    <div class="container app-container" id="appSection">
+        <div class="app-card">
+            <div class="header-section">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h3 class="mb-0">Selamat Datang, <span id="displayUsername"></span></h3>
+                    <button class="btn btn-outline-danger btn-sm" id="logoutBtn">Keluar</button>
+                </div>
+                <h1 class="display-4">Voting Sederhana</h1>
+                <p class="text-muted">Pilih opsi favorit Anda</p>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="vote-option">
+                        <h2>Pilihan A</h2>
+                        <div class="vote-count" id="countA">0</div>
+                        <div class="vote-percentage" id="percentA">0%</div>
+                        <button class="btn btn-light btn-vote" onclick="vote('A')">Vote A</button>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="vote-option option-b">
+                        <h2>Pilihan B</h2>
+                        <div class="vote-count" id="countB">0</div>
+                        <div class="vote-percentage" id="percentB">0%</div>
+                        <button class="btn btn-light btn-vote" onclick="vote('B')">Vote B</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <h5>Visualisasi Hasil</h5>
+                <div class="progress-bar-custom">
+                    <div class="progress-fill-a" id="progressA" style="width: 50%">A: 50%</div>
+                    <div class="progress-fill-b" id="progressB" style="width: 50%">B: 50%</div>
+                </div>
+            </div>
+
+            <div class="text-center mt-4">
+                <p class="text-muted">Total Suara: <strong id="totalVotes">0</strong></p>
+                <button class="btn btn-danger" onclick="resetVotes()">Reset Semua Suara</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register(getServiceWorkerContent())
+                .then(reg => console.log('Service Worker registered'))
+                .catch(err => console.log('Service Worker registration failed'));
+        }
+
+        function getServiceWorkerContent() {
+            const swContent = `
+                const CACHE_NAME = 'voting-app-v1';
+                const urlsToCache = ['/'];
+
+                self.addEventListener('install', event => {
+                    event.waitUntil(
+                        caches.open(CACHE_NAME)
+                            .then(cache => cache.addAll(urlsToCache))
+                    );
+                });
+
+                self.addEventListener('fetch', event => {
+                    event.respondWith(
+                        caches.match(event.request)
+                            .then(response => response || fetch(event.request))
+                    );
+                });
+            `;
+            const blob = new Blob([swContent], { type: 'application/javascript' });
+            return URL.createObjectURL(blob);
+        }
+
+        // Manifest JSON
+        const manifestData = {
+            name: 'Voting Sederhana',
+            short_name: 'Voting',
+            description: 'Aplikasi voting sederhana untuk mahasiswa',
+            start_url: '.',
+            display: 'standalone',
+            theme_color: '#0d6efd',
+            background_color: '#ffffff',
+            icons: [
+                {
+                    src: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="%230d6efd"/><text x="50" y="70" font-size="60" text-anchor="middle" fill="white" font-weight="bold">V</text></svg>',
+                    sizes: '192x192',
+                    type: 'image/svg+xml'
+                }
+            ]
+        };
+
+        const manifestBlob = new Blob([JSON.stringify(manifestData)], { type: 'application/json' });
+        const manifestURL = URL.createObjectURL(manifestBlob);
+        document.getElementById('manifest-placeholder').setAttribute('href', manifestURL);
+
+        // PWA Install Prompt
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            document.getElementById('installPrompt').style.display = 'block';
+        });
+
+        document.getElementById('installBtn').addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                deferredPrompt = null;
+                document.getElementById('installPrompt').style.display = 'none';
+            }
+        });
+
+        // Login System
+        document.getElementById('loginForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            if (username && password) {
+                sessionStorage.setItem('loggedIn', 'true');
+                sessionStorage.setItem('username', username);
+                showApp();
+            }
+        });
+
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            sessionStorage.removeItem('loggedIn');
+            sessionStorage.removeItem('username');
+            location.reload();
+        });
+
+        function showApp() {
+            document.getElementById('loginSection').style.display = 'none';
+            document.getElementById('appSection').style.display = 'block';
+            document.getElementById('displayUsername').textContent = sessionStorage.getItem('username');
+            loadVotes();
+        }
+
+        // Check login status
+        if (sessionStorage.getItem('loggedIn') === 'true') {
+            showApp();
+        }
+
+        // Voting System
+        let votesA = parseInt(localStorage.getItem('votesA')) || 0;
+        let votesB = parseInt(localStorage.getItem('votesB')) || 0;
+
+        function vote(option) {
+            if (option === 'A') {
+                votesA++;
+                localStorage.setItem('votesA', votesA);
+            } else {
+                votesB++;
+                localStorage.setItem('votesB', votesB);
+            }
+            updateDisplay();
+        }
+
+        function updateDisplay() {
+            const total = votesA + votesB;
+            const percentA = total > 0 ? ((votesA / total) * 100).toFixed(1) : 0;
+            const percentB = total > 0 ? ((votesB / total) * 100).toFixed(1) : 0;
+
+            document.getElementById('countA').textContent = votesA;
+            document.getElementById('countB').textContent = votesB;
+            document.getElementById('percentA').textContent = percentA + '%';
+            document.getElementById('percentB').textContent = percentB + '%';
+            document.getElementById('totalVotes').textContent = total;
+
+            document.getElementById('progressA').style.width = percentA + '%';
+            document.getElementById('progressA').textContent = 'A: ' + percentA + '%';
+            document.getElementById('progressB').style.width = percentB + '%';
+            document.getElementById('progressB').textContent = 'B: ' + percentB + '%';
+        }
+
+        function loadVotes() {
+            votesA = parseInt(localStorage.getItem('votesA')) || 0;
+            votesB = parseInt(localStorage.getItem('votesB')) || 0;
+            updateDisplay();
+        }
+
+        function resetVotes() {
+            if (confirm('Apakah Anda yakin ingin mereset semua suara?')) {
+                votesA = 0;
+                votesB = 0;
+                localStorage.setItem('votesA', 0);
+                localStorage.setItem('votesB', 0);
+                updateDisplay();
+            }
+        }
+
+        // Initialize
+        loadVotes();
+    </script>
+</body>
+</html>
